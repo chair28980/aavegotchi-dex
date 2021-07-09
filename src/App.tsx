@@ -21,86 +21,30 @@ function App() {
     const aavegotchiContract = new web3.eth.Contract(diamondABI as AbiItem[], diamondAddress);
     setContract(aavegotchiContract);
   }
-  const fetchGotchis = async () => {
+  const fetchListings = async () => {
     const query = `
     {
-      aavegotchis(first: 100, orderBy: gotchiId) {
+      erc1155Listings(first: 500, where: {erc1155TypeId: "138"}, orderBy: timeCreated) {
         id
-        name
-        collateral
-        withSetsNumericTraits
+        timeCreated
+        timeLastPurchased
+        priceInWei
+        sold
       }
     }
   `
     const response = await request<QueryResponse>(uri, query);
-    setGotchis(response.aavegotchis)
+    console.log({ response })
   }
-
-  const [collaterals, setCollaterals] = useState<Array<Collateral>>([]);
-
-  const getCollateralColor = (gotchiCollateral: string) => {
-    const collateral = collaterals.find(item => item.collateralType.toLowerCase() === gotchiCollateral);
-    if (collateral) {
-      return collateral.collateralTypeInfo.primaryColor.replace("0x", '#');
-    }
-    return "white";
-  }
-
-  const [gotchiSVG, setGotchiSVG] = useState<string>('');
 
   useEffect(() => {
-    fetchGotchis();
+    fetchListings();
     connectToWeb3();
   }, [])
 
-  useEffect(() => {
-    if (!!contract) {
-      const fetchAavegotchiCollaterals = async () => {
-        const collaterals = await contract.methods.getCollateralInfo().call();
-        setCollaterals(collaterals);
-      };
-      fetchAavegotchiCollaterals();
-    }
-  }, [contract]);
-
-  useEffect(() => {
-    const getAavegotchiSVG = async (tokenId: string) => {
-      const svg = await contract?.methods.getAavegotchiSvg(tokenId).call();
-      setGotchiSVG(svg);
-    };
-
-    if (contract && gotchis.length > 0) {
-      getAavegotchiSVG(gotchis[selectedGotchi].id)
-    }
-  }, [selectedGotchi, contract, gotchis]);
-
   return (
     <div className="App">
-      <div className="container">
-        <div className="selected-container">
-          {gotchis.length > 0 && (
-            <SelectedGotchi
-              svg={gotchiSVG}
-              name={gotchis[selectedGotchi].name}
-              traits={gotchis[selectedGotchi].withSetsNumericTraits}
-            />
-          )}
-        </div>
-        <div className="gotchi-list">
-          {
-            gotchis.map((gotchi, i) => (
-              <GotchiListing
-                key={gotchi.id}
-                id={gotchi.id}
-                name={gotchi.name}
-                collateralColor={getCollateralColor(gotchi.collateral)}
-                selectGotchi={() => setSelectedGotchi(i)}
-                selected={i === selectedGotchi}
-              />
-            ))
-          }
-        </div>
-      </div>
+      hai
     </div>
   );
 }
